@@ -49,21 +49,16 @@ private:
     class Neural {
         public:   
         //constructor for inner class
-        Neural(std::vector<double> weight, bool ifInput, bool ifOutput) {
+        Neural(std::vector<double> weight) {
             this->weight = weight;
-            this->ifInput = ifInput;
-            this->ifOutput = ifOutput;
         }
 
         //constructor for inner class
-        Neural(bool ifInput, bool ifOutput) {
-            this->ifInput = ifInput;
-            this->ifOutput = ifOutput;
+        Neural() {
+            //nothing
         }
         
         std::vector<double> weight;
-        bool ifInput;
-        bool ifOutput;
     };
     
     /**
@@ -71,7 +66,7 @@ private:
      * @param x represents input
      * @return f(x) where f is sigmoid Function
      */
-    double sigmoidFunction(double x);
+    int sigmoidFunction(double x) const;
 
     std::vector<std::vector<Neural>> neurals_;
     const int initial_weight = 1;
