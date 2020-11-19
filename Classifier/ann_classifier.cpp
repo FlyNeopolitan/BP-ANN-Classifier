@@ -76,3 +76,15 @@ int ANNClassifier::sigmoidFunction(double x) const {
     return 0;
 }
 
+std::vector<std::vector<unsigned>> ANNClassifier::strutureMatrix() const {
+    std::vector<std::vector<unsigned>> structure;
+    for (unsigned i = 0; i < neurals_.size(); ++i) {
+        std::vector<unsigned> currentLayer;
+        for (auto neural : neurals_[i]) {
+            currentLayer.push_back(neural.weight.size());
+        }
+        structure.push_back(currentLayer);
+    }
+    return structure;
+}
+

@@ -19,7 +19,7 @@ class Classifier {
     * @param input represents the input vector
     * @return the output vector
     */
-    virtual std::vector<int> classify(const std::vector<int>& input) = 0;
+    virtual std::vector<int> classify(const std::vector<int>& input) const = 0;
 
     /**
     * train the Classifier for a pair of input and output

@@ -43,6 +43,13 @@ public:
     * clear all the data.
     */
     void clear();
+    
+    /**
+    * @return the structure Matrix of Neurals
+    * For example, if there are 2,3,4 Neuronses in level 1,2,3
+    * then we will get a vector {{3,3}, {4,4,4}, {0, 0, 0, 0}}.
+    */
+    std::vector<std::vector<unsigned>> strutureMatrix() const;
 
 private:
 
