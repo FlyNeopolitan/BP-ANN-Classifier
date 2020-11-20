@@ -1,6 +1,8 @@
 #pragma once
 #include "classifier.h"
 #include "math.h"
+#include "../Math/function.h"
+#include "iostream"
 
 class ANNClassifier : Classifier {
 
@@ -61,6 +63,13 @@ public:
     */
     std::vector<double> biasVector() const;
 
+    /**
+    * @param input represents training input
+    * @param output represents expected output 
+    * @return derivative Matrix for training
+    */
+    std::vector<std::vector<std::vector<double>>> derivative(const std::vector<double>& input, const std::vector<double>& output);
+
 private:
 
     class Neural {
@@ -78,18 +87,35 @@ private:
         std::vector<double> weight;
     };
     
+    
     /**
-     * sigmoid Function
+     * active Function
      * @param x represents input
-     * @return f(x) where f is sigmoid Function
+     * @return f(x) where f is the active function
+     * currently we are using sigmoid function with alpha = 1
      */
-    double sigmoidFunction(double x, double alpha = 1) const;
+    double activeFunction(double x) const;
+    
+    /**
+    * @return the value Maxtrix according to the input
+    */
+    std::vector<std::vector<double>> valueMatrix(const std::vector<double>& input) const;
 
+    /**
+    * @param input represents trainning input
+    * @param output represents expected output
+    * @return lossVector of training 
+    * lossVector[i] = (output[i-input[i])^2/2
+    */
+    std::vector<double> lossVector(const std::vector<double>& input, const std::vector<double>& output);
+    
+    
     std::vector<std::vector<Neural>> neurals_;
     std::vector<double> bias_;
 
     const double initial_weight = 1;
     const double initial_bias = 0;
+    const double learningRate = 1;
     
 };
 

@@ -2,6 +2,7 @@
 #include "catch/catch.hpp"
 #include "../Classifier/ann_classifier.h"
 
+bool estimatedEqual(std::vector<double>, std::vector<double>, double);
 
 TEST_CASE("Set Input") {
 
@@ -139,3 +140,43 @@ TEST_CASE("Classify") {
     }
 }
 
+
+TEST_CASE("Train") {
+    SECTION("does train work? : simple test1") {
+        ANNClassifier test;
+        test.resetNeurons(std::vector<unsigned>{2,1});
+        for (unsigned i = 0; i < 1000; ++i) {
+            test.train(std::vector<double>{0.5, 0.5}, std::vector<double>{0.9});
+        }
+        REQUIRE(estimatedEqual(test.classify(std::vector<double>{0.5, 0.5}), std::vector<double>{0.9}, 0.05));
+    }
+
+    SECTION("does train work? : simple test2") {
+        ANNClassifier test;
+        test.resetNeurons(std::vector<unsigned>{3, 3, 2});
+        for (unsigned i = 0; i < 1000; ++i) {
+            test.train(std::vector<double>{0.2, 0.3, 0.4}, std::vector<double>{0.4, 0.7});
+        }
+        REQUIRE(estimatedEqual(test.classify(std::vector<double>{0.2, 0.3, 0.4}), std::vector<double>{0.4, 0.7}, 0.05));
+    }
+
+    SECTION("does train work? : simple test3") {
+        ANNClassifier test;
+        test.resetNeurons(std::vector<unsigned>{4, 4, 2, 5, 6, 3});
+        for (unsigned i = 0; i < 1000; ++i) {
+            test.train(std::vector<double>{0.2, 0.3, 0.4, 0.5}, std::vector<double>{0.1, 0.2, 0.8});
+        }
+        REQUIRE(estimatedEqual(test.classify(std::vector<double>{0.2, 0.3, 0.4, 0.5}), std::vector<double>{0.1, 0.2, 0.8}, 0.05));
+    }
+}
+
+
+
+bool estimatedEqual(std::vector<double> x, std::vector<double> y, double margin) {
+    for (unsigned i = 0; i < x.size() && i < y.size(); ++i) {
+        if (abs(x[i] - y[i]) > margin) {
+            return false;
+        }
+    }
+    return true;
+}

@@ -50,6 +50,58 @@ void ANNClassifier::resetNeurons(const std::vector<unsigned>& Neurons) {
 
 std::vector<double> ANNClassifier::classify(const std::vector<double>& input) const {
     //value represents results for each partition
+    auto value = valueMatrix(input);
+    //output will be the last layer
+    return value[value.size() - 1];
+}
+
+
+void ANNClassifier::train(const std::vector<double>& input, const std::vector<double>& output) {
+    //get derivativeMatrix
+    auto derivativeMatrix = derivative(input, output);
+    //update weights
+    for (unsigned layer = 0; layer < neurals_.size() - 1; ++layer) {
+        for (unsigned unit = 0; unit < neurals_[layer].size(); ++unit) {
+            for (unsigned w = 0; w < neurals_[layer][unit].weight.size(); ++w) {
+                neurals_[layer][unit].weight[w] -= learningRate * derivativeMatrix[layer][unit][w];
+            }
+        }
+    }
+    //to do : updates bias
+}
+
+
+void ANNClassifier::clear() {
+    //to do
+    neurals_.clear();
+    bias_.clear();
+}
+
+
+double ANNClassifier::activeFunction(double x) const {
+    return sigmoidFunction(x);
+}
+
+
+std::vector<std::vector<unsigned>> ANNClassifier::strutureMatrix() const {
+    std::vector<std::vector<unsigned>> structure;
+    for (unsigned i = 0; i < neurals_.size(); ++i) {
+        std::vector<unsigned> currentLayer;
+        for (auto neural : neurals_[i]) {
+            currentLayer.push_back(neural.weight.size());
+        }
+        structure.push_back(currentLayer);
+    }
+    return structure;
+}
+
+
+std::vector<double> ANNClassifier::biasVector() const {
+    return bias_;
+}
+
+
+std::vector<std::vector<double>> ANNClassifier::valueMatrix(const std::vector<double>& input) const {
     std::vector<std::vector<double>> value;
     value.push_back(input);
     for (unsigned i = 0; i < neurals_.size() - 1; ++i) {
@@ -67,39 +119,61 @@ std::vector<double> ANNClassifier::classify(const std::vector<double>& input) co
         }
         value.push_back(next);
     }
-    //output will be the last layer
-    return value[value.size() - 1];
+    return value;
 }
 
 
-void ANNClassifier::train(const std::vector<double>& input, const std::vector<double>& output) {
-    //to do
-}
-
-void ANNClassifier::clear() {
-    //to do
-    neurals_.clear();
-    bias_.clear();
-}
-
-
-double ANNClassifier::sigmoidFunction(double x, double alpha) const {
-    return 0.5 * (x * alpha / (1 + abs(x * alpha))) + 0.5;
-}
-
-std::vector<std::vector<unsigned>> ANNClassifier::strutureMatrix() const {
-    std::vector<std::vector<unsigned>> structure;
-    for (unsigned i = 0; i < neurals_.size(); ++i) {
-        std::vector<unsigned> currentLayer;
-        for (auto neural : neurals_[i]) {
-            currentLayer.push_back(neural.weight.size());
+std::vector<std::vector<std::vector<double>>>
+    ANNClassifier::derivative(const std::vector<double>& input, const std::vector<double>& output) {
+        auto values = valueMatrix(input);
+        auto actual = classify(input);
+        std::vector<std::vector<std::vector<double>>> results;
+        //initilize the matrix
+        for (unsigned i = 0; i < neurals_.size() - 1; ++i) {
+            results.push_back(std::vector<std::vector<double>>());
         }
-        structure.push_back(currentLayer);
-    }
-    return structure;
+        //update last layer
+        int lastIndex = results.size() - 1;
+        for (unsigned i = 0; i < neurals_[lastIndex].size(); ++i) {
+            std::vector<double> current;
+            for (unsigned j = 0; j < neurals_[lastIndex][0].weight.size(); ++j) {
+                double gradient_E_out = - output[j] + actual[j];
+                double gradient_out_net = actual[j] * (1 - actual[j]);
+                double gradient_net_w = values[lastIndex][j];
+                double d = gradient_E_out * gradient_out_net * gradient_net_w;
+                current.push_back(d);
+            }
+            results[lastIndex].push_back(current);
+        }
+        //from last to front, update layers
+        for (int i = lastIndex - 1; i >= 0; --i) {
+            for (unsigned j = 0; j < neurals_[i].size(); ++j) {
+                std::vector<double> current;
+                for (unsigned k = 0; k < neurals_[i][0].weight.size(); ++k) {
+                    double factor = values[i][j] * (1 - values[i + 1][k]);
+                    double E = 0;
+                    for (unsigned t = 0; t < results[i + 1][k].size(); ++t) {
+                        E += results[i + 1][k][t] * neurals_[i + 1][k].weight[t];
+                    }
+                    current.push_back(E * factor);
+                }
+                results[i].push_back(current);
+            }
+        }
+        return results;
 }
 
-std::vector<double> ANNClassifier::biasVector() const {
-    return bias_;
+
+std::vector<double> ANNClassifier::lossVector(const std::vector<double>& input, const std::vector<double>& output) {
+    std::vector<double> E;
+    auto result = classify(input);
+    for (unsigned i = 0; i < result.size(); ++i) {
+        double value = (input[i] - output[i]) * (input[i] - output[i]) / 2;
+        E.push_back(value);
+    }
+    return E;
 }
+
+
+
 

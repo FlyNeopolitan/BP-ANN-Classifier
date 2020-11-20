@@ -1,5 +1,5 @@
 EXENAME = main
-OBJS = main.o ann_classifier.o 
+OBJS = main.o ann_classifier.o function.o
 
 CXX = clang++
 CXXFLAGS = $(CS225) -std=c++1y -stdlib=libc++ -c -g -O0 -Wall -Wextra -pedantic
@@ -12,8 +12,11 @@ $(EXENAME) : $(OBJS)
 main.o : output_msg main.cpp Classifier/ann_classifier.h
 	$(CXX) $(CXXFLAGS) main.cpp
 
-ann_classifier.o : Classifier/ann_classifier.cpp Classifier/ann_classifier.h Classifier/classifier.h
+ann_classifier.o : Classifier/ann_classifier.cpp Classifier/ann_classifier.h Classifier/classifier.h Math/function.h
 	$(CXX) $(CXXFLAGS) Classifier/ann_classifier.cpp
+
+function.o : Math/function.cpp Math/function.h
+	$(CXX) $(CXXFLAGS) Math/function.cpp
 
 clean :
 	-rm -f *.o $(EXENAME) test_
@@ -37,8 +40,8 @@ output_msg: ; $(CLANG_VERSION_MSG)
 
 # Be sure to add output_msg as dependency target for your `intro` binary
 
-tests: output_msg ann_test.o ann_classifier.o 
-	$(LD) ann_test.o ann_classifier.o $(LDFLAGS) -o tests
+tests: output_msg ann_test.o ann_classifier.o function.o
+	$(LD) ann_test.o ann_classifier.o function.o $(LDFLAGS) -o tests
 
 ann_test.o : Test/ann_test.cpp Test/catch/catch.hpp Classifier/ann_classifier.h
 	$(CXX) $(CXXFLAGS) Test/ann_test.cpp
