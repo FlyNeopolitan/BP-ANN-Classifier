@@ -24,35 +24,45 @@ void ANNClassifier::setOutput(const unsigned& num) {
             neural.weight = std::vector<double>(num, initial_weight);
         }
     }
+    if (neurals_.size() == 1) {
+        neurals_.push_back(std::vector<Neural>(num, Neural()));
+        for (Neural& neural : neurals_[0]) {
+            neural.weight = std::vector<double>(num, initial_weight);
+        }
+        bias_.push_back(initial_bias);
+    }
 }
 
 
 void ANNClassifier::resetNeurons(const std::vector<unsigned>& Neurons) {
+    clear();
     for (unsigned i = 0; i < Neurons.size() - 1; ++i) {
         //insert layer at index i 
         std::vector<Neural> current(Neurons[i], 
             Neural(std::vector<double>(Neurons[i + 1], initial_weight)));
         neurals_.push_back(current);
+        bias_.push_back(initial_bias);
     }
     //instert last layer
     neurals_.push_back(std::vector<Neural>(Neurons.back(), Neural()));
 }
 
 
-std::vector<int> ANNClassifier::classify(const std::vector<int>& input) const {
+std::vector<double> ANNClassifier::classify(const std::vector<double>& input) const {
     //value represents results for each partition
-    std::vector<std::vector<int>> value;
+    std::vector<std::vector<double>> value;
     value.push_back(input);
     for (unsigned i = 0; i < neurals_.size() - 1; ++i) {
-        std::vector<int> current = value[i];
-        std::vector<int> next;
+        std::vector<double> current = value[i];
+        std::vector<double> next;
         //update value for Jth item of next layer
         for (unsigned j = 0; j < neurals_[i + 1].size(); ++j) {
-            int v = 0;
+            double v = 0;
             //use current layer's value and weight to calculate Kth value of Nerual at next layer
             for (unsigned k = 0; k < neurals_[i].size(); ++k) {
-                v += sigmoidFunction(current[k] * neurals_[i][k].weight[j]);  
+                v += current[k] * neurals_[i][k].weight[j];  
             }
+            v = sigmoidFunction(v + bias_[i]);
             next.push_back(v);
         }
         value.push_back(next);
@@ -62,18 +72,19 @@ std::vector<int> ANNClassifier::classify(const std::vector<int>& input) const {
 }
 
 
-void ANNClassifier::train(const std::vector<int>& input, const std::vector<int>& output) {
+void ANNClassifier::train(const std::vector<double>& input, const std::vector<double>& output) {
     //to do
 }
 
 void ANNClassifier::clear() {
     //to do
     neurals_.clear();
+    bias_.clear();
 }
 
 
-int ANNClassifier::sigmoidFunction(double x) const {
-    return 0;
+double ANNClassifier::sigmoidFunction(double x, double alpha) const {
+    return 0.5 * (x * alpha / (1 + abs(x * alpha))) + 0.5;
 }
 
 std::vector<std::vector<unsigned>> ANNClassifier::strutureMatrix() const {
@@ -86,5 +97,9 @@ std::vector<std::vector<unsigned>> ANNClassifier::strutureMatrix() const {
         structure.push_back(currentLayer);
     }
     return structure;
+}
+
+std::vector<double> ANNClassifier::biasVector() const {
+    return bias_;
 }
 

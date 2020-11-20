@@ -1,5 +1,6 @@
 #pragma once
 #include "classifier.h"
+#include "math.h"
 
 class ANNClassifier : Classifier {
 
@@ -8,12 +9,15 @@ public:
     /**
     * initilize or reset the input with certain size
     * @param num represents the number of volume of input vector
+    * edage case : when there's no layer, we will add a layer as the input layer
     */
     void setInput(const unsigned& num);
     
     /**
     * initilize or reset the output with certain size
     * @param num represents the number of volume of output vector
+    * edge case : when there's only one layer(input layer), we will add a layer as a output layer
+    * edge case : when there's no layer, do nothing
     */
     void setOutput(const unsigned& num);
     
@@ -29,15 +33,16 @@ public:
     * classify the input
     * @param input represents the input vector
     * @return the output vector
+    * when there's only one layer(only input layer), the output will be exactly the same as input
     */
-    std::vector<int> classify(const std::vector<int>& input) const;
+    std::vector<double> classify(const std::vector<double>& input) const;
 
     /**
     * train the Classifier for a pair of input and output
     * @param input represents an input 
     * @param output represents expected output
     */
-    void train(const std::vector<int>& input, const std::vector<int>& output);
+    void train(const std::vector<double>& input, const std::vector<double>& output);
 
     /**
     * clear all the data.
@@ -50,6 +55,11 @@ public:
     * then we will get a vector {{3,3}, {4,4,4}, {0, 0, 0, 0}}.
     */
     std::vector<std::vector<unsigned>> strutureMatrix() const;
+
+    /**
+    * @return the biasVector
+    */
+    std::vector<double> biasVector() const;
 
 private:
 
@@ -73,10 +83,13 @@ private:
      * @param x represents input
      * @return f(x) where f is sigmoid Function
      */
-    int sigmoidFunction(double x) const;
+    double sigmoidFunction(double x, double alpha = 1) const;
 
     std::vector<std::vector<Neural>> neurals_;
-    const int initial_weight = 1;
+    std::vector<double> bias_;
+
+    const double initial_weight = 1;
+    const double initial_bias = 0;
     
 };
 

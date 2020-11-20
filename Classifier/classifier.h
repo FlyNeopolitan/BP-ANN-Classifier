@@ -19,14 +19,14 @@ class Classifier {
     * @param input represents the input vector
     * @return the output vector
     */
-    virtual std::vector<int> classify(const std::vector<int>& input) const = 0;
+    virtual std::vector<double> classify(const std::vector<double>& input) const = 0;
 
     /**
     * train the Classifier for a pair of input and output
     * @param input represents an input 
     * @param output represents expected output
     */
-    virtual void train(const std::vector<int>& input, const std::vector<int>& output) = 0;
+    virtual void train(const std::vector<double>& input, const std::vector<double>& output) = 0;
 
     /**
     * clear all the data.
