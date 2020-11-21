@@ -1,4 +1,5 @@
 #pragma once
+
 #include "classifier.h"
 #include "math.h"
 #include "../Math/function.h"
@@ -7,6 +8,19 @@
 class ANNClassifier : Classifier {
 
 public:
+
+    /**
+    * default constructor : create a empty ANNClassifier
+    */
+    ANNClassifier();
+
+    /**
+    * initialization list constructor
+    * @param Neurons represents the vector of Neurons, from input to output
+    * for example, vector {2,3,2} indicates there are 2,3,2 Neuronses in level 1,2,3. 
+    * (Level 1 is closest to input layer, and level 3 is closest to output layer)
+    */
+    ANNClassifier(std::initializer_list<unsigned> Neurons);
 
     /**
     * initilize or reset the input with certain size
@@ -64,11 +78,19 @@ public:
     std::vector<double> biasVector() const;
 
     /**
+    * get the derivatives for training for each weight using a 3-dimentional vector
     * @param input represents training input
     * @param output represents expected output 
     * @return derivative Matrix for training
     */
     std::vector<std::vector<std::vector<double>>> derivative(const std::vector<double>& input, const std::vector<double>& output);
+
+    /**
+    * reset learning rate to new one
+    * @param newRate represents new learning rate
+    * set to 1 by default
+    */
+    void resetLearningRate(double newRate = 1);
 
 private:
 
@@ -97,6 +119,7 @@ private:
     double activeFunction(double x) const;
     
     /**
+    * @param input represents input vector
     * @return the value Maxtrix according to the input
     */
     std::vector<std::vector<double>> valueMatrix(const std::vector<double>& input) const;
@@ -105,18 +128,24 @@ private:
     * @param input represents trainning input
     * @param output represents expected output
     * @return lossVector of training 
-    * lossVector[i] = (output[i-input[i])^2/2
+    * lossVector[i] = (output[i-input[i])^2 / output.size()
     */
     std::vector<double> lossVector(const std::vector<double>& input, const std::vector<double>& output);
     
+    /**
+    * @param derivativeM represents derivativeMatrix
+    * @return derivativeBias vector
+    */
+    std::vector<double> derivativeBiasVector(const std::vector<std::vector<std::vector<double>>>& derivativeM, 
+        const std::vector<std::vector<double>>& valueM) const;
     
+    //neurals and bias 
     std::vector<std::vector<Neural>> neurals_;
     std::vector<double> bias_;
-
+    //basic setting for learning
     const double initial_weight = 1;
     const double initial_bias = 0;
-    const double learningRate = 1;
+    double learningRate = 1;
     
 };
-
 

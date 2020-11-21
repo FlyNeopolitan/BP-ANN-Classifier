@@ -1,5 +1,16 @@
 #include "ann_classifier.h"
 
+ANNClassifier::ANNClassifier() {
+    //do nothing
+}
+
+
+ANNClassifier::ANNClassifier(std::initializer_list<unsigned> Neurons) {
+    std::vector<unsigned> list(Neurons);
+    resetNeurons(list);
+}
+
+
 void ANNClassifier::setInput(const unsigned& num) {
     if (neurals_.size() == 0) {
         //create and insert the input Neural
@@ -67,7 +78,11 @@ void ANNClassifier::train(const std::vector<double>& input, const std::vector<do
             }
         }
     }
-    //to do : updates bias
+    //updates bias
+    auto biasDerivate = derivativeBiasVector(derivativeMatrix, valueMatrix(input));
+    for (unsigned layer = 0; layer < bias_.size(); ++layer) {
+        bias_[layer] -= learningRate * biasDerivate[layer];
+    }
 }
 
 
@@ -126,7 +141,7 @@ std::vector<std::vector<double>> ANNClassifier::valueMatrix(const std::vector<do
 std::vector<std::vector<std::vector<double>>>
     ANNClassifier::derivative(const std::vector<double>& input, const std::vector<double>& output) {
         auto values = valueMatrix(input);
-        auto actual = classify(input);
+        auto actual = values[values.size() - 1];
         std::vector<std::vector<std::vector<double>>> results;
         //initilize the matrix
         for (unsigned i = 0; i < neurals_.size() - 1; ++i) {
@@ -137,7 +152,7 @@ std::vector<std::vector<std::vector<double>>>
         for (unsigned i = 0; i < neurals_[lastIndex].size(); ++i) {
             std::vector<double> current;
             for (unsigned j = 0; j < neurals_[lastIndex][0].weight.size(); ++j) {
-                double gradient_E_out = - output[j] + actual[j];
+                double gradient_E_out = (- output[j] + actual[j]) * 2 / input.size();
                 double gradient_out_net = actual[j] * (1 - actual[j]);
                 double gradient_net_w = values[lastIndex][j];
                 double d = gradient_E_out * gradient_out_net * gradient_net_w;
@@ -168,12 +183,30 @@ std::vector<double> ANNClassifier::lossVector(const std::vector<double>& input, 
     std::vector<double> E;
     auto result = classify(input);
     for (unsigned i = 0; i < result.size(); ++i) {
-        double value = (input[i] - output[i]) * (input[i] - output[i]) / 2;
+        double value = (input[i] - output[i]) * (input[i] - output[i]) / input.size();
         E.push_back(value);
     }
     return E;
 }
 
+
+std::vector<double> ANNClassifier::derivativeBiasVector(const std::vector<std::vector<std::vector<double>>>& derivativeM, 
+    const std::vector<std::vector<double>>& valueM) const {
+    std::vector<double> results;
+    for (unsigned layer = 0; layer < derivativeM.size(); ++layer) {
+        double current = 0;
+        for (unsigned w = 0; w < derivativeM[layer][0].size(); ++w) {
+            current += derivativeM[layer][0][w] / valueM[layer][0];
+        }
+        results.push_back(current);
+    }
+    return results;
+}
+
+
+void ANNClassifier::resetLearningRate(double newRate) {
+    learningRate = newRate;
+}
 
 
 
