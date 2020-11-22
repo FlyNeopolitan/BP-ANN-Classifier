@@ -11,7 +11,7 @@ Also, it passes all basic tests.
 3.Classify!  
 For details, check Classifier/ann_classifier.h and Classifier/classifier.h; If you are still confused, check main.cpp for a sample for Iris data.
 ## I am still CONFUSED!
-Here is another sample:  
+Here is another example:  
 Assume you want to classify a 2x2 image, which has 4 pixels and each pixel has 2 state 0(black) or 1(white). 
 Thus, we can convert the image to a vector: if an image is  
 black black  
